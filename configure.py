@@ -1,6 +1,7 @@
 import json
 import os
 
+
 class AnnotionConfigure(object):
     def __init__(self,jsonPath):
         try:
@@ -17,6 +18,7 @@ class AnnotionConfigure(object):
     @classmethod
     def loadConfig(cls,*args,**kwargs):
         AnnotionConfigure._instance=AnnotionConfigure(*args,**kwargs)
+
     @classmethod
     def saveConfig(cls,savePath):
         pass
@@ -32,8 +34,10 @@ class AnnotionConfigure(object):
         for i in range(len(self.classes)):
             ret.append([self.classes[i]["id"],self.classes[i]["cls"],self.classes[i]["color"]])
         return ret
+
     def getClassCnt(self):
         return len(self.classes)
+
     def getClassColor(self,i):
         return self.classes[i]['color']
 
@@ -43,10 +47,13 @@ class AnnotionConfigure(object):
         for i in range(len(kpoints)):
             ret.append([kpoints[i]["id"],kpoints[i]["name"],kpoints[i]["color"]])
         return ret
+
     def getKeypointCntByClassId(self,cid):
         return len(self.classes[cid]["keypoints"])
+
     def getKeypointColor(self,cid,i):
         return self.classes[cid]['keypoints'][i]['color']
+
 
 class GeneralConfigure(object):
     def __init__(self):
@@ -68,8 +75,8 @@ class GeneralConfigure(object):
             GeneralConfigure._instance=GeneralConfigure()
         return GeneralConfigure._instance
 
-    def setAnnotionDir(self,path):
-        self.annotiondir=path
+    def setAnnotionDir(self, path):
+        self.annotiondir = path
 
     # Make sure the folder without not-image file
     def setImageDir(self,path):
@@ -84,10 +91,13 @@ class GeneralConfigure(object):
         if self.index==None:
             return None
         return self.images[self.index]
+
     def getImageDir(self):
         return self.imagedir
+
     def getAnnotionDir(self):
         return self.annotiondir
+
     def getAnnotionFileName(self):
         if self.index==None:
             return None

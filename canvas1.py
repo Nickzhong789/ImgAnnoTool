@@ -51,7 +51,8 @@ class Canvas(FigureCanvas):
         self.prange = 0.1
         self.keypointCnt = 0
         self.nextbegin = 0
-        self.image=None
+        self.image = None
+        self.weight_list = []
 
     def updateCanvas(self, path):
         self.subfig.cla()
@@ -116,8 +117,7 @@ class Canvas(FigureCanvas):
                         return
                     self.bboxs[self.selectPicker].kpointIds[self.nextbegin] = self.pickerCnt
                     self.kpoint[self.pickerCnt] = WrapKeyPoint(
-                        patches.Rectangle(
-                                          self.pointToRect(ev.xdata,ev.ydata), self.prange,
+                        patches.Rectangle([ev.xdata - self.prange / 2, ev.ydata - self.prange / 2], self.prange,
                                           self.prange,
                                           picker=self.pickerCnt,
                                           edgecolor=None,
@@ -128,7 +128,12 @@ class Canvas(FigureCanvas):
                         self.nextbegin,
                         self.selectPicker
                     )
-                    self.parent.addKeypoint(self.nextbegin,self.bboxs[self.selectPicker].cls,self.selectPicker,self.pickerCnt)
+                    weight = float(self.parent.getKpWeight())
+                    self.weight_list.append(weight)
+                    self.parent.addKeypoint(ev, self.nextbegin, self.bboxs[self.selectPicker].cls, self.selectPicker,
+                                            self.pickerCnt, weight)
+                    print(self.nextbegin, self.bboxs[self.selectPicker].cls, self.selectPicker,
+                          self.pickerCnt)
                     self.subfig.add_patch(self.kpoint[self.pickerCnt].rect)
                     self.pickerCnt += 1
                     self.status = CanvasStatus.CREATE_KPOINT
@@ -138,40 +143,47 @@ class Canvas(FigureCanvas):
         self.draw()
 
     def on_motion_notify_event(self, ev):
-        if ev.xdata==None or ev.ydata==None:
+        if ev.xdata == None or ev.ydata == None:
             return
         if self.status == CanvasStatus.CREATE_BBOX:
             self.cursor.onmove(ev)
             if ev.button == 1:
-                self.bboxs[self.selectPicker].rect.set_width(min(self.image.width,max(0,ev.xdata)) - self.bboxs[self.selectPicker].rect.get_x())
-                self.bboxs[self.selectPicker].rect.set_height(min(self.image.height,max(0,ev.ydata)) - self.bboxs[self.selectPicker].rect.get_y())
+                self.bboxs[self.selectPicker].rect.set_width(
+                    min(self.image.width, max(0, ev.xdata)) - self.bboxs[self.selectPicker].rect.get_x())
+                self.bboxs[self.selectPicker].rect.set_height(
+                    min(self.image.height, max(0, ev.ydata)) - self.bboxs[self.selectPicker].rect.get_y())
         elif self.status == CanvasStatus.MOVE_BBOX:
-            self.bboxs[self.selectPicker].rect.set_x(min(self.image.width,max(0,ev.xdata)) - self.clickPointDist[0])
-            self.bboxs[self.selectPicker].rect.set_y(min(self.image.height,max(0,ev.ydata)) - self.clickPointDist[1])
+            self.bboxs[self.selectPicker].rect.set_x(min(self.image.width, max(0, ev.xdata)) - self.clickPointDist[0])
+            self.bboxs[self.selectPicker].rect.set_y(min(self.image.height, max(0, ev.ydata)) - self.clickPointDist[1])
             self.draw()
         elif self.status == CanvasStatus.MOTIFY_BBOX_RU:
-            self.bboxs[self.selectPicker].rect.set_y(min(self.image.height,max(0,ev.ydata)))
-            self.bboxs[self.selectPicker].rect.set_width(min(self.image.width,max(0,ev.xdata)) - self.bboxs[self.selectPicker].rect.get_x())
-            self.bboxs[self.selectPicker].rect.set_height(self.rectrdpoint[1] - min(self.image.height,max(0,ev.ydata)))
+            self.bboxs[self.selectPicker].rect.set_y(min(self.image.height, max(0, ev.ydata)))
+            self.bboxs[self.selectPicker].rect.set_width(
+                min(self.image.width, max(0, ev.xdata)) - self.bboxs[self.selectPicker].rect.get_x())
+            self.bboxs[self.selectPicker].rect.set_height(
+                self.rectrdpoint[1] - min(self.image.height, max(0, ev.ydata)))
         elif self.status == CanvasStatus.MOTIFY_BBOX_RD:
-            self.bboxs[self.selectPicker].rect.set_width(min(self.image.width,max(0,ev.xdata)) - self.bboxs[self.selectPicker].rect.get_x())
-            self.bboxs[self.selectPicker].rect.set_height(min(self.image.height,max(0,ev.ydata)) - self.bboxs[self.selectPicker].rect.get_y())
+            self.bboxs[self.selectPicker].rect.set_width(
+                min(self.image.width, max(0, ev.xdata)) - self.bboxs[self.selectPicker].rect.get_x())
+            self.bboxs[self.selectPicker].rect.set_height(
+                min(self.image.height, max(0, ev.ydata)) - self.bboxs[self.selectPicker].rect.get_y())
 
         elif self.status == CanvasStatus.MOTIFY_BBOX_LU:
-            self.bboxs[self.selectPicker].rect.set_x(min(self.image.width,max(0,ev.xdata)))
-            self.bboxs[self.selectPicker].rect.set_y(min(self.image.height,max(0,ev.ydata)))
+            self.bboxs[self.selectPicker].rect.set_x(min(self.image.width, max(0, ev.xdata)))
+            self.bboxs[self.selectPicker].rect.set_y(min(self.image.height, max(0, ev.ydata)))
             self.bboxs[self.selectPicker].rect.set_width(
                 self.rectrdpoint[0] - self.bboxs[self.selectPicker].rect.get_x())
             self.bboxs[self.selectPicker].rect.set_height(
                 self.rectrdpoint[1] - self.bboxs[self.selectPicker].rect.get_y())
         elif self.status == CanvasStatus.MOTIFY_BBOX_LD:
-            self.bboxs[self.selectPicker].rect.set_x(min(self.image.width,max(0,ev.xdata)))
-            self.bboxs[self.selectPicker].rect.set_height(min(self.image.height,max(0,ev.ydata)) - self.bboxs[self.selectPicker].rect.get_y())
-            self.bboxs[self.selectPicker].rect.set_width(self.rectrdpoint[0] - min(self.image.width,max(0,ev.xdata)))
+            self.bboxs[self.selectPicker].rect.set_x(min(self.image.width, max(0, ev.xdata)))
+            self.bboxs[self.selectPicker].rect.set_height(
+                min(self.image.height, max(0, ev.ydata)) - self.bboxs[self.selectPicker].rect.get_y())
+            self.bboxs[self.selectPicker].rect.set_width(self.rectrdpoint[0] - min(self.image.width, max(0, ev.xdata)))
         elif self.status == CanvasStatus.MOVE_KPOINT:
             self.kpoint[self.selectPicker].rect.set_xy(
-                [min(self.image.width,max(0,ev.xdata)) - self.prange / 2,
-                 min(self.image.height,max(0,ev.ydata)) - self.prange / 2]
+                [min(self.image.width, max(0, ev.xdata)) - self.prange / 2,
+                 min(self.image.height, max(0, ev.ydata)) - self.prange / 2]
             )
             self.draw()
 
@@ -186,11 +198,11 @@ class Canvas(FigureCanvas):
                     self.pickerCnt -= 1
                 else:
                     self.repairBBox()
-                    self.parent.addBBox(self.bboxs[self.selectPicker].cls,self.selectPicker)
+                    self.parent.addBBox(self.bboxs[self.selectPicker].cls, self.selectPicker)
                 self.selectPicker = None
                 self.cursor.visible = False
             elif self.status == CanvasStatus.MOTIFY_BBOX_RD or self.status == CanvasStatus.MOTIFY_BBOX_LU or \
-                            self.status == CanvasStatus.MOTIFY_BBOX_LD or self.status == CanvasStatus.MOTIFY_BBOX_RU:
+                    self.status == CanvasStatus.MOTIFY_BBOX_LD or self.status == CanvasStatus.MOTIFY_BBOX_RU:
                 self.status = CanvasStatus.SELECT_BBOX
                 self.repairBBox()
                 self.cursor.visible = False
@@ -277,17 +289,17 @@ class Canvas(FigureCanvas):
             self.subfig.patches.remove(self.kpoint[self.selectPicker].rect)
             self.parent.deleteKeypoint(self.kpoint[self.selectPicker].id,
                                        self.bboxs[self.kpoint[self.selectPicker].bboxId].cls,
-                                       self.kpoint[self.selectPicker].bboxId,self.selectPicker)
+                                       self.kpoint[self.selectPicker].bboxId, self.selectPicker)
             self.bboxs[self.kpoint[self.selectPicker].bboxId].kpointIds[self.kpoint[self.selectPicker].id] = None
             self.kpoint.pop(self.selectPicker)
         elif self.status == CanvasStatus.SELECT_BBOX:
             for keypointId in self.bboxs[self.selectPicker].kpointIds.keys():
-                if self.bboxs[self.selectPicker].kpointIds[keypointId]==None:
+                if self.bboxs[self.selectPicker].kpointIds[keypointId] == None:
                     continue
                 self.subfig.patches.remove(self.kpoint[self.bboxs[self.selectPicker].kpointIds[keypointId]].rect)
                 self.kpoint.pop(self.bboxs[self.selectPicker].kpointIds[keypointId])
             self.subfig.patches.remove(self.bboxs[self.selectPicker].rect)
-            self.parent.deleteBBox(self.bboxs[self.selectPicker].cls,self.selectPicker)
+            self.parent.deleteBBox(self.bboxs[self.selectPicker].cls, self.selectPicker)
             self.bboxs.pop(self.selectPicker)
         self.status = CanvasStatus.NONE
         self.selectPicker = None
@@ -354,143 +366,151 @@ class Canvas(FigureCanvas):
         self.nextbegin = self.nextKeypointIndex(self.bboxs[self.selectPicker], begin)
         return self.nextbegin
 
-    def selectItem(self,pickerId,type='bbox'):
+    def selectItem(self, pickerId, type='bbox'):
         '''
 
         :param pickerId: patch id
         :param type:  bbox or kpoint
         :return:
         '''
-        cls=0
-        if type=='bbox':
-            self.status=CanvasStatus.SELECT_BBOX
-            self.selectPicker=pickerId
+        cls = 0
+        if type == 'bbox':
+            self.status = CanvasStatus.SELECT_BBOX
+            self.selectPicker = pickerId
             self.bboxs[self.selectPicker].rect.set_alpha(0.5)
-            cls=self.bboxs[self.selectPicker].cls
+            cls = self.bboxs[self.selectPicker].cls
             # update predefine_keypoint list and its index
             self.parent.refreshPredefineKeypointListView(cls)
-            self.nextbegin=self.findNextKeypointIndex(0)
+            self.nextbegin = self.findNextKeypointIndex(0)
             self.parent.setFocusOnPredefineKeypointListview(
                 self.nextKeypointIndex(self.bboxs[self.selectPicker], 0))
-        elif type=='kpoint':
-            self.status=CanvasStatus.SELECT_KPOINT
-            self.selectPicker=pickerId
+        elif type == 'kpoint':
+            self.status = CanvasStatus.SELECT_KPOINT
+            self.selectPicker = pickerId
             self.kpoint[self.selectPicker].rect.set_alpha(0.5)
             self.bboxs[self.kpoint[self.selectPicker].bboxId].rect.set_alpha(0.5)
-            cls=self.bboxs[self.kpoint[self.selectPicker].bboxId].cls
-            self.nextbegin=self.nextKeypointIndex(self.bboxs[self.kpoint[self.selectPicker].bboxId],self.kpoint[self.selectPicker].id)
+            cls = self.bboxs[self.kpoint[self.selectPicker].bboxId].cls
+            self.nextbegin = self.nextKeypointIndex(self.bboxs[self.kpoint[self.selectPicker].bboxId],
+                                                    self.kpoint[self.selectPicker].id)
             self.parent.refreshPredefineKeypointListView(cls)
             # update predefine_keypoint list and its index
             self.parent.setFocusOnPredefineKeypointListview(
                 self.nextKeypointIndex(self.bboxs[self.kpoint[self.selectPicker].bboxId], self.nextbegin))
         self.draw()
 
-    def selectBBox(self,picker):
-        if self.status==CanvasStatus.SELECT_KPOINT:
+    def selectBBox(self, picker):
+        if self.status == CanvasStatus.SELECT_KPOINT:
             self.kpoint[self.selectPicker].rect.set_alpha(1.0)
             self.bboxs[self.kpoint[self.selectPicker].bboxId].rect.set_alpha(1.0)
-        elif self.status==CanvasStatus.SELECT_BBOX:
+        elif self.status == CanvasStatus.SELECT_BBOX:
             self.bboxs[self.selectPicker].rect.set_alpha(1.0)
-        self.selectItem(picker,'bbox')
-    def selectKpoint(self,picker):
-        if self.status==CanvasStatus.SELECT_KPOINT:
+        self.selectItem(picker, 'bbox')
+
+    def selectKpoint(self, picker):
+        if self.status == CanvasStatus.SELECT_KPOINT:
             self.kpoint[self.selectPicker].rect.set_alpha(1.0)
             self.bboxs[self.kpoint[self.selectPicker].bboxId].rect.set_alpha(1.0)
-        elif self.status==CanvasStatus.SELECT_BBOX:
+        elif self.status == CanvasStatus.SELECT_BBOX:
             self.bboxs[self.selectPicker].rect.set_alpha(1.0)
-        self.selectItem(picker,'kpoint')
+        self.selectItem(picker, 'kpoint')
 
     def saveAnnotion(self):
         try:
-        #for i in range(1):
-            width=self.image.width
-            height=self.image.height
-            imagename=GeneralConfigure.instance().getImageName()
-            imagedir=GeneralConfigure.instance().getImageDir()
-            if imagename==None:
+            # for i in range(1):
+            width = self.image.width
+            height = self.image.height
+            imagename = GeneralConfigure.instance().getImageName()
+            imagedir = GeneralConfigure.instance().getImageDir()
+            if imagename == None:
                 return False
 
-            boundingboxs=[]
+            boundingboxs = []
             for bkey in self.bboxs.keys():
-                cls=AnnotionConfigure.instance().getClassConfig()[self.bboxs[bkey].cls][1]
-                bbox=[
+                cls = AnnotionConfigure.instance().getClassConfig()[self.bboxs[bkey].cls][1]
+                bbox = [
                     int(self.bboxs[bkey].rect.get_x()),
                     int(self.bboxs[bkey].rect.get_y()),
-                    int(self.bboxs[bkey].rect.get_x())+int(self.bboxs[bkey].rect.get_width()),
-                        int(self.bboxs[bkey].rect.get_y())+int(self.bboxs[bkey].rect.get_height()),
+                    int(self.bboxs[bkey].rect.get_x()) + int(self.bboxs[bkey].rect.get_width()),
+                    int(self.bboxs[bkey].rect.get_y()) + int(self.bboxs[bkey].rect.get_height()),
                 ]
-                keypoints=[]
+                keypoints = []
+                print(self.bboxs[bkey].kpointIds)
+                idx = 0
                 for kkey in range(len(self.bboxs[bkey].kpointIds)):
-                    pickerId=self.bboxs[bkey].kpointIds[kkey]
-                    if pickerId!=None:
-                        x, y = self.rectToPoint(self.kpoint[pickerId].rect)
+                    pickerId = self.bboxs[bkey].kpointIds[kkey]
+                    if pickerId is not None:
                         keypoints.append([
                             kkey,
-                            int(x),
-                            int(y),
-                            1
+                            int(self.kpoint[pickerId].rect.get_x()) + int(self.kpoint[pickerId].rect.get_width() / 2),
+                            int(self.kpoint[pickerId].rect.get_y()) + int(self.kpoint[pickerId].rect.get_height() / 2),
+                            1,
+                            self.weight_list[-1]
                         ])
+                        # print(self.kpoint[pickerId].rect.get_x(), self.kpoint[pickerId].rect.get_y())
                     else:
                         keypoints.append([
                             kkey,
                             0,
                             0,
+                            0,
                             0
                         ])
+                    idx += 1
                 boundingboxs.append([{
-                    'class':cls,
-                    'rectangle':bbox,
-                    'keypoints':keypoints
+                    'class': cls,
+                    'rectangle': bbox,
+                    'keypoints': keypoints
                 }])
-            obj=[{
-                'image':{'imgName':imagename,
-                'imgPath':imagedir,
-                'width':width,
-                'height':height},
-                'bboxs':boundingboxs
+            obj = [{
+                'image': {'imgName': imagename,
+                          'imgPath': imagedir,
+                          'width': width,
+                          'height': height},
+                'bboxs': boundingboxs
             }]
-            s=json.dumps(obj)
-            with open(os.path.join(GeneralConfigure.instance().getAnnotionDir(),
-                                   GeneralConfigure.instance().getAnnotionFileName()),'w') as f:
-                f.write(s)
+            s = json.dumps(obj)
+            if len(boundingboxs) > 0:
+                with open(os.path.join(GeneralConfigure.instance().getAnnotionDir(),
+                                       GeneralConfigure.instance().getAnnotionFileName()), 'w') as f:
+                    f.write(s)
 
         except Exception as e:
             print(e)
             return False
         return True
 
-    def loadAnnotion(self,annofile):
-        with open(annofile,'r') as f:
-            obj=json.load(f)[0]
-        self.prange=max(obj['image']['width'],obj['image']['height'])/100
+    def loadAnnotion(self, annofile):
+        with open(annofile, 'r') as f:
+            obj = json.load(f)[0]
+        self.prange = max(obj['image']['width'], obj['image']['height']) / 100
         for bbox in obj['bboxs']:
-            bbox=bbox[0]
-            bboxId=self.pickerCnt
-            cls=bbox['class']
-            clsId=int(AnnotionConfigure.instance().clsToId[cls])
-            rect=bbox['rectangle']
-            bboxrect=patches.Rectangle([rect[0],rect[1]],rect[2]-rect[0],rect[3]-rect[1],linewidth=5,
-                                       edgecolor=AnnotionConfigure.instance().getClassColor(clsId),
-                                       facecolor='none',picker=self.pickerCnt)
-            self.parent.addBBox(clsId,self.pickerCnt)
+            bbox = bbox[0]
+            bboxId = self.pickerCnt
+            cls = bbox['class']
+            clsId = int(AnnotionConfigure.instance().clsToId[cls])
+            rect = bbox['rectangle']
+            bboxrect = patches.Rectangle([rect[0], rect[1]], rect[2] - rect[0], rect[3] - rect[1], linewidth=5,
+                                         edgecolor=AnnotionConfigure.instance().getClassColor(clsId),
+                                         facecolor='none', picker=self.pickerCnt)
+            self.parent.addBBox(clsId, self.pickerCnt)
             self.subfig.add_patch(bboxrect)
-            self.pickerCnt+=1
-            keypoints={}
-            for kid,kx,ky,visible in bbox['keypoints']:
-                if visible==0:
-                    keypoints[kid]=None
+            self.pickerCnt += 1
+            keypoints = {}
+            for kid, kx, ky, visible, weight in bbox['keypoints']:
+                if visible == 0:
+                    keypoints[kid] = None
                 else:
-                    keypoints[kid]=self.pickerCnt
-                    kprect=patches.Rectangle(self.pointToRect(kx,ky),self.prange,self.prange,
-                              picker=self.pickerCnt,
-                              edgecolor=None,
-                              facecolor=AnnotionConfigure.instance().getKeypointColor(clsId,kid))
+                    keypoints[kid] = self.pickerCnt
+                    kprect = patches.Rectangle([kx - self.prange / 2, ky - self.prange / 2], self.prange, self.prange,
+                                               picker=self.pickerCnt,
+                                               edgecolor=None,
+                                               facecolor=AnnotionConfigure.instance().getKeypointColor(clsId, kid))
                     self.subfig.add_patch(kprect)
-                    self.kpoint[self.pickerCnt]=WrapKeyPoint(
-                        kprect,kid,bboxId
+                    self.kpoint[self.pickerCnt] = WrapKeyPoint(
+                        kprect, kid, bboxId
                     )
-                    self.parent.addKeypoint(kid,clsId,bboxId,self.pickerCnt)
-                    self.pickerCnt+=1
+                    self.parent.addKp(kx, ky, kid, clsId, bboxId, self.pickerCnt, weight)
+                    self.pickerCnt += 1
 
             self.bboxs[bboxId] = WrapBoundingBox(
                 bboxrect,
@@ -499,9 +519,3 @@ class Canvas(FigureCanvas):
                 keypoints
             )
             self.draw()
-
-    def pointToRect(self,x,y):
-        return x-self.prange/2,y-self.prange/2,x+self.prange/2,y+self.prange/2
-
-    def rectToPoint(self,rect):
-        return rect.get_x()+rect.get_width()/2,rect.get_y()+rect.get_height()/2

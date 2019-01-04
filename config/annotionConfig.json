@@ -1,108 +1,104 @@
 {
-	"classes":[
-		{
-			"id":"0",
-			"cls":"humen",
-			"color":"red",
-			"keypoints":[
-				{
-					"id":"0",
-					"name":"r ankle",
-					"color":"red"
-				},
-				{
-					"id":"1",
-					"name":"r knee",
-					"color":"green"
-				},
-				{
-					"id":"2",
-					"name":"r hip",
-					"color":"blue"
-				},
-				{
-					"id":"3",
-					"name":"l hip",
-					"color":"yellow"
-				},
-				{
-					"id":"4",
-					"name":"l knee",
-					"color":"white"
-				},
-				{
-					"id":"5",
-					"name":"l ankle",
-					"color":"black"
-				},
-				{
-					"id":"6",
-					"name":"pelvis",
-					"color":"gray"
-				},
-				{
-					"id":"7",
-					"name":"thorax",
-					"color":"pink"
-				},
-				{
-					"id":"8",
-					"name":"upper neck",
-					"color":"brown"
-				},
-				{
-					"id":"9",
-					"name":"head top",
-					"color":"gold"
-				},
-				{
-					"id":"10",
-					"name":"r wist",
-					"color":"purple"
-				},
-				{
-					"id":"11",
-					"name":"r elbow",
-					"color":"skyblue"
-				},
-				{
-					"id":"12",
-					"name":"r shoulder",
-					"color":"darkred"
-				},
-				{
-					"id":"13",
-					"name":"l shoulder",
-					"color":"darkgreen"
-				},
-				{
-					"id":"14",
-					"name":"l elbow",
-					"color":"darkblue"
-				},
-				{
-					"id":"15",
-					"name":"l wrist",
-					"color":"greenyellow"
-				}
-			]
-		},
-		{
-			"id":"1",
-			"cls":"cow",
-			"color":"green",
-			"keypoints":[
-				{
-					"id":"0",
-					"name":"c1",
-					"color":"red"
-				},
-				{
-					"id":"1",
-					"name":"c2",
-					"color":"green"
-				}
-			]
-		}
-		]
+  "classes": [{
+      "id": "0",
+      "cls": "human",
+      "color": "red",
+      "keypoints": [{
+          "id": "0",
+          "name": "Jaw",
+          "color": "red"
+        },
+        {
+          "id": "1",
+          "name": "lNeck",
+          "color": "green"
+        },
+        {
+          "id": "2",
+          "name": "rNeck",
+          "color": "blue"
+        },
+        {
+          "id": "3",
+          "name": "bNeck",
+          "color": "yellow"
+        },
+        {
+          "id": "4",
+          "name": "lShoulder",
+          "color": "black"
+        },
+        {
+          "id": "5",
+          "name": "rShoulder",
+          "color": "pink"
+        },
+        {
+          "id": "6",
+          "name": "rElbow",
+          "color": "brown"
+        },
+        {
+          "id": "7",
+          "name": "rElbow",
+          "color": "white"
+        },
+        {
+          "id": "8",
+          "name": "lPalm",
+          "color": "orange"
+        },
+        {
+          "id": "9",
+          "name": "rPalm",
+          "color": "purple"
+        },
+        {
+          "id": "10",
+          "name": "lHaunch",
+          "color": "magenta"
+        },
+        {
+          "id": "11",
+          "name": "rHaunch",
+          "color": "gold"
+        },
+        {
+          "id": "12",
+          "name": "bHaunch",
+          "color": "silver"
+        },
+        {
+          "id": "13",
+          "name": "lKnee",
+          "color": "yellow"
+        },
+        {
+          "id": "14",
+          "name": "rKnee",
+          "color": "yellow"
+        },
+        {
+          "id": "15",
+          "name": "lTiptoe",
+          "color": "yellow"
+        },
+        {
+          "id": "16",
+          "name": "rTiptoe",
+          "color": "yellow"
+        },
+        {
+          "id": "17",
+          "name": "lHeel",
+          "color": "yellow"
+        },
+        {
+          "id": "18",
+          "name": "rHeel",
+          "color": "yellow"
+        }
+      ]
+    }
+  ]
 }

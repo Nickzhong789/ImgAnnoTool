@@ -5,8 +5,9 @@ from canvas1 import Canvas
 from PyQt5.QtWidgets import QFileDialog
 from configure import *
 
+
 class AnnotionToolMainWindow(QMainWindow):
-    def __init__(self,parent=None):
+    def __init__(self, parent=None):
         super(AnnotionToolMainWindow, self).__init__(parent)
         self.setCentralWidget(QtWidgets.QWidget())
 
@@ -154,7 +155,7 @@ class AnnotionToolMainWindow(QMainWindow):
     def nextImageBtn_click(self):
         if self.canvas.image==None:
             return
-        self.canvas.saveAnnotion()
+        self.canvas.saveAnnotion
         image,anno=GeneralConfigure.instance().getNext()
         if image==None:
             return
@@ -166,7 +167,7 @@ class AnnotionToolMainWindow(QMainWindow):
     def preImageBtn_click(self):
         if self.canvas.image==None:
             return
-        self.canvas.saveAnnotion()
+        self.canvas.saveAnnotion
         image,anno=GeneralConfigure.instance().getPre()
         if image==None:
             return
@@ -182,28 +183,30 @@ class AnnotionToolMainWindow(QMainWindow):
         self.keypointListModel.setStringList(self.kpointLists[index])
         self.keypointListView.setModel(self.keypointListModel)
         self.canvas.selectBBox(index)
+
     def keypointListView_click(self):
         print('kpoint')
-        index=int(self.keypointListView.currentIndex().data().split(':')[1])
+        index = int(self.keypointListView.currentIndex().data().split(':')[1])
         self.canvas.selectKpoint(index)
 
     def predefine_classListView_click(self):
         self.refreshPredefineKeypointListView(
             int(self.predefine_classListView.model().data(self.predefine_classListView.currentIndex(),0).split(':\t')[0])
         )
+
     def predefine_keypointListView_click(self):
         self.canvas.nextbegin=self.canvas.findNextKeypointIndex(self.predefine_keypointListView.currentIndex().row())
-        if self.canvas.nextbegin==None:
+        if self.canvas.nextbegin is None:
             return
         self.predefine_keypointListView.setCurrentIndex(self.predefine_keypointListView.model().createIndex(self.canvas.nextbegin,0))
 
     def keyReleaseEvent(self, e):
-        if e.key()>=QtCore.Qt.Key_0 and e.key()<=QtCore.Qt.Key_9:
+        if QtCore.Qt.Key_0 <= e.key() <= QtCore.Qt.Key_9:
             self.refreshPredefineKeypointListView(
                 int(self.predefine_classListView.model().data(
                     self.predefine_classListView.model().createIndex(
                         e.key()-QtCore.Qt.Key_0,0
-                    ),0).split(':\t')[0])
+                    ), 0).split(':\t')[0])
             )
             print(1)
             self.canvas.create_bbox(e.key()-QtCore.Qt.Key_0,
@@ -239,36 +242,42 @@ class AnnotionToolMainWindow(QMainWindow):
             index=self.predefine_keypointListView.model().index(i,0)
             self.predefine_keypointListView.setCurrentIndex(index)
         self.predefine_keypointListView.setFocus()
+
     def setFocusOnPredefineClassListView(self):
         self.predefine_classListView.setFocus()
+
     def getPredefineKeypointCurrentItem(self):
-        index=self.predefine_keypointListView.currentIndex()
+        index = self.predefine_keypointListView.currentIndex()
         return index.row()
 
     def addBBox(self,cid,picker):
         self.bboxList.append('{}:{}'.format(AnnotionConfigure.instance().getClassConfig()[cid][1],picker))
         self.bboxListModel.setStringList(self.bboxList)
         self.boundingboxListView.setModel(self.bboxListModel)
-        self.kpointLists[picker]=[]
-    def deleteBBox(self,cid,picker):
-        self.bboxList.remove('{}:{}'.format(AnnotionConfigure.instance().getClassConfig()[cid][1],picker))
+        self.kpointLists[picker] = []
+
+    def deleteBBox(self, cid, picker):
+        self.bboxList.remove('{}:{}'.format(AnnotionConfigure.instance().getClassConfig()[cid][1], picker))
         self.bboxListModel.setStringList(self.bboxList)
         self.boundingboxListView.setModel(self.bboxListModel)
         self.kpointLists.pop(picker)
         self.keypointListModel.setStringList([])
         self.keypointListView.setModel(self.keypointListModel)
-    def addKeypoint(self,kid,cls,ppicker,picker):
-        self.kpointLists[ppicker].append('{}:{}'.format(AnnotionConfigure.instance().getKeypointConfigByClassId(cls)[kid][1],picker))
+
+    def addKeypoint(self, kid, cls, ppicker, picker):
+        print(self.kpointLists)
+        self.kpointLists[ppicker].append('{}:{}'.format(AnnotionConfigure.instance().getKeypointConfigByClassId(cls)[kid][1],
+                                                        picker))
         self.keypointListModel.setStringList(self.kpointLists[ppicker])
         self.keypointListView.setModel(self.keypointListModel)
-    def deleteKeypoint(self,kid,cls,ppicker,picker):
+
+    def deleteKeypoint(self, kid, cls, ppicker, picker):
         self.kpointLists[ppicker].remove('{}:{}'.format(AnnotionConfigure.instance().getKeypointConfigByClassId(cls)[kid][1],picker))
         self.keypointListModel.setStringList(self.kpointLists[ppicker])
         self.keypointListView.setModel(self.keypointListModel)
 
     def refreshAnnotionViewList(self,bbox,kpoint=None):
-        bboxItem='{}:{}'.format(AnnotionConfigure.instance().getClassConfig()[bbox.cls][1],
-                                bbox.rect._picker)
+        bboxItem = '{}:{}'.format(AnnotionConfigure.instance().getClassConfig()[bbox.cls][1], bbox.rect._picker)
         bindex=self.bboxList.index(bboxItem)
         kpindex=None
         if kpoint!=None:
