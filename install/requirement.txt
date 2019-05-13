@@ -1,0 +1,7 @@
+Matplotlib
+numpy
+pillow
+PyQt5
+
+
+

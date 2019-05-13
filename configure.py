@@ -1,22 +1,24 @@
 import json
 import os
 
+
 class AnnotionConfigure(object):
-    def __init__(self,jsonPath):
+    def __init__(self, jsonPath):
         try:
             with open(jsonPath,'r') as f:
-                self.data=json.load(f)
+                self.data = json.load(f)
         except Exception as e:
             print(e)
 
-        self.classes=self.data["classes"]
-        self.clsToId={}
+        self.classes = self.data["classes"]
+        self.clsToId = {}
         for i in self.classes:
-            self.clsToId[i["cls"]]=i["id"]
+            self.clsToId[i["cls"]] = i["id"]
 
     @classmethod
     def loadConfig(cls,*args,**kwargs):
         AnnotionConfigure._instance=AnnotionConfigure(*args,**kwargs)
+
     @classmethod
     def saveConfig(cls,savePath):
         pass
@@ -30,10 +32,12 @@ class AnnotionConfigure(object):
     def getClassConfig(self):
         ret=[]
         for i in range(len(self.classes)):
-            ret.append([self.classes[i]["id"],self.classes[i]["cls"],self.classes[i]["color"]])
+            ret.append([self.classes[i]["id"], self.classes[i]["cls"], self.classes[i]["color"]])
         return ret
+
     def getClassCnt(self):
         return len(self.classes)
+
     def getClassColor(self,i):
         return self.classes[i]['color']
 
@@ -43,10 +47,13 @@ class AnnotionConfigure(object):
         for i in range(len(kpoints)):
             ret.append([kpoints[i]["id"],kpoints[i]["name"],kpoints[i]["color"]])
         return ret
-    def getKeypointCntByClassId(self,cid):
+
+    def getKeypointCntByClassId(self, cid):
         return len(self.classes[cid]["keypoints"])
-    def getKeypointColor(self,cid,i):
+
+    def getKeypointColor(self, cid, i):
         return self.classes[cid]['keypoints'][i]['color']
+
 
 class GeneralConfigure(object):
     def __init__(self):
@@ -84,12 +91,15 @@ class GeneralConfigure(object):
         if self.index==None:
             return None
         return self.images[self.index]
+
     def getImageDir(self):
         return self.imagedir
+
     def getAnnotionDir(self):
         return self.annotiondir
+
     def getAnnotionFileName(self):
-        if self.index==None:
+        if self.index == None:
             return None
         return self.fileFormat.format(self.images[self.index].split('.')[0])
 

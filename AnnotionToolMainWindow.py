@@ -1,12 +1,13 @@
-from PyQt5 import QtWidgets,QtCore,QtGui,Qt
+from PyQt5 import QtWidgets,QtCore,QtGui
 from PyQt5.QtWidgets import QMainWindow
 import sys
 from canvas1 import Canvas
 from PyQt5.QtWidgets import QFileDialog
 from configure import *
 
+
 class AnnotionToolMainWindow(QMainWindow):
-    def __init__(self,parent=None):
+    def __init__(self, parent=None):
         super(AnnotionToolMainWindow, self).__init__(parent)
         self.setCentralWidget(QtWidgets.QWidget())
 
@@ -39,6 +40,9 @@ class AnnotionToolMainWindow(QMainWindow):
         self.nextImageBtn=QtWidgets.QPushButton(self)
         self.nextImageBtn.setText("next image")
         self.nextImageBtn.setShortcut('d')
+        self.saveAnnoBtn = QtWidgets.QPushButton(self)
+        self.saveAnnoBtn.setText("save")
+        self.saveAnnoBtn.setShortcut('s')
 
         self.centralLayout=QtWidgets.QVBoxLayout()
         self.toolsLayout=QtWidgets.QHBoxLayout()
@@ -68,6 +72,7 @@ class AnnotionToolMainWindow(QMainWindow):
         self.buttonsLayout.addWidget(self.selectAnnotionPathBtn)
         self.buttonsLayout.addWidget(self.preImageBtn)
         self.buttonsLayout.addWidget(self.nextImageBtn)
+        self.buttonsLayout.addWidget(self.saveAnnoBtn)
 
         self.centralWidget().setLayout(self.centralLayout)
 
@@ -163,6 +168,7 @@ class AnnotionToolMainWindow(QMainWindow):
         self.resetViewList()
         if anno!=None:
             self.canvas.loadAnnotion(anno)
+
     def preImageBtn_click(self):
         if self.canvas.image==None:
             return
@@ -175,6 +181,11 @@ class AnnotionToolMainWindow(QMainWindow):
         self.resetViewList()
         if anno!=None:
             self.canvas.loadAnnotion(anno)
+
+    def saveAnno(self):
+        if self.canvas.image is None:
+            return
+        self.canvas.saveAnnotion()
 
     def boundingboxListView_click(self):
         print('bbox')
@@ -191,6 +202,7 @@ class AnnotionToolMainWindow(QMainWindow):
         self.refreshPredefineKeypointListView(
             int(self.predefine_classListView.model().data(self.predefine_classListView.currentIndex(),0).split(':\t')[0])
         )
+
     def predefine_keypointListView_click(self):
         self.canvas.nextbegin=self.canvas.findNextKeypointIndex(self.predefine_keypointListView.currentIndex().row())
         if self.canvas.nextbegin==None:
@@ -239,8 +251,10 @@ class AnnotionToolMainWindow(QMainWindow):
             index=self.predefine_keypointListView.model().index(i,0)
             self.predefine_keypointListView.setCurrentIndex(index)
         self.predefine_keypointListView.setFocus()
+
     def setFocusOnPredefineClassListView(self):
         self.predefine_classListView.setFocus()
+
     def getPredefineKeypointCurrentItem(self):
         index=self.predefine_keypointListView.currentIndex()
         return index.row()
@@ -250,6 +264,7 @@ class AnnotionToolMainWindow(QMainWindow):
         self.bboxListModel.setStringList(self.bboxList)
         self.boundingboxListView.setModel(self.bboxListModel)
         self.kpointLists[picker]=[]
+
     def deleteBBox(self,cid,picker):
         self.bboxList.remove('{}:{}'.format(AnnotionConfigure.instance().getClassConfig()[cid][1],picker))
         self.bboxListModel.setStringList(self.bboxList)
@@ -257,10 +272,12 @@ class AnnotionToolMainWindow(QMainWindow):
         self.kpointLists.pop(picker)
         self.keypointListModel.setStringList([])
         self.keypointListView.setModel(self.keypointListModel)
+
     def addKeypoint(self,kid,cls,ppicker,picker):
         self.kpointLists[ppicker].append('{}:{}'.format(AnnotionConfigure.instance().getKeypointConfigByClassId(cls)[kid][1],picker))
         self.keypointListModel.setStringList(self.kpointLists[ppicker])
         self.keypointListView.setModel(self.keypointListModel)
+
     def deleteKeypoint(self,kid,cls,ppicker,picker):
         self.kpointLists[ppicker].remove('{}:{}'.format(AnnotionConfigure.instance().getKeypointConfigByClassId(cls)[kid][1],picker))
         self.keypointListModel.setStringList(self.kpointLists[ppicker])
@@ -286,6 +303,7 @@ class AnnotionToolMainWindow(QMainWindow):
             self.keypointListView.setCurrentIndex(
                 self.keypointListView.model().index(kpindex,0)
             )
+
 
 if __name__ == '__main__':
     app=QtWidgets.QApplication(sys.argv)
